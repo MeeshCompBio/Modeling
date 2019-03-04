@@ -174,7 +174,37 @@
 * Deterministic policy means that a policy at a given state will always return the same action
 * Stochastic policy means to output a distribution probability over acitons
 
-#### Model based
-* We create a model of the behavior of the environment
-* Each environment will need a different model representation
+## RL with Q-learning
+* A value based RL alogirthm
+* Creates a table where we caluculate the maximum expected future reward for each action at each state
+* For this example, grid based try to find princess, each tile has four possible actions
+* Computationally grid is transformed into a table
+    * row will be state and columns will be actions (for this example)
+* Q stands for quality of the action (think of the table as a cheat sheet)
+* Each Q table scroe will be the maximum expected future reward that we would get if we take the action at that state with the best policy given
+
+### Q-learning algorithm
+* The action-value function or Q-function takes two inputs (state and action), it will then reutrn the expected future reward of action at that state
+* Before exploration, Q-table will give arbitrary fixed value (mostly 0), as environment is explored, Q table will iteravely update and give us better and better approximantions using the Bellman equation
+* Q-learning algorithm process
+    * Initialize Q-table
+    * 2) Choose an action
+    * Perform action
+    * Measure reward
+    * Update Q
+    * return to 2)
+
+* Q-table is but with m cols (number of actions) and n rows (number of states), values are initialized at 0
+* Steps will be repeated until max number of episodes are met (user specfied)
+* Choosing and action a at the current state s is based off the current Q-val esitmates
+* What it everything is 0 first, what happens next?
+* Using epsilon greedy strategy
+    * We set an exploration rate (epsilon) to 1 in the beginning. This will be the rate of steps that we will do randomly
+    * The rate must be at its highest value becuase we don't know anything abotu values in Q-table
+    * We then generate a random number, if it is bigger than epsilon, then we will "exploit" (select best action at each step), or else we will explore
+    * Idea is to have big epsilon at the beginning so we do more exploration then reduce it over time as the agent becomes more confident at estimating Q-values
+
+* Take the action a and observe the outcomes state s' and reward r, now update the function Q(s,a)
+* We then take the action a that we chose in step 3, and then performing this action returns us a new state s' and a reward r
+* Then update Q(s,a) using the Bellman equation
 
