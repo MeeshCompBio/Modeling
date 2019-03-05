@@ -8,6 +8,8 @@
 [Deep Reinforcement Learning Series](https://medium.com/@jonathan_hui/rl-deep-reinforcement-learning-series-833319a95530)  
 [Intro to reinforcement learning](https://medium.freecodecamp.org/an-introduction-to-reinforcement-learning-4339519de419)  
 [RL video tutorials](https://www.youtube.com/watch?v=q2ZOEFAaaI0&feature=youtu.be)  
+[Simple Reinforcement Learning with Tensorflow Part 8: Asynchronous Actor-Critic Agents (A3C)](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2)  
+[Conveloution in machine learning](https://medium.com/@ageitgey/machine-learning-is-fun-part-3-deep-learning-and-convolutional-neural-networks-f40359318721)
 
 ## Overview
 
@@ -144,8 +146,7 @@
 * Monte Carlo
     * When an episode ends, the agent looks that the total cumulative reward to see how well it performed.
     * Rewards are only recieved at the end of the game
-    * We will then start a new game with the added knowledge, hoping the agent makes better decisions with each iteration
-
+    * We will then start a new game with the added knowledge, hoping the agent makes better decisions with each iteration  
 * TD learning
     * Will not wait until the end of the rpisode to update the maximum future reward estimation
     * It will update its value estimation V for the non-terminal states St occuring at that experience
@@ -192,8 +193,7 @@
     * Perform action
     * Measure reward
     * Update Q
-    * return to 2)
-
+    * return to 2)  
 * Q-table is but with m cols (number of actions) and n rows (number of states), values are initialized at 0
 * Steps will be repeated until max number of episodes are met (user specfied)
 * Choosing and action a at the current state s is based off the current Q-val esitmates
@@ -202,9 +202,27 @@
     * We set an exploration rate (epsilon) to 1 in the beginning. This will be the rate of steps that we will do randomly
     * The rate must be at its highest value becuase we don't know anything abotu values in Q-table
     * We then generate a random number, if it is bigger than epsilon, then we will "exploit" (select best action at each step), or else we will explore
-    * Idea is to have big epsilon at the beginning so we do more exploration then reduce it over time as the agent becomes more confident at estimating Q-values
-
+    * Idea is to have big epsilon at the beginning so we do more exploration then reduce it over time as the agent becomes more confident at estimating Q-values  
 * Take the action a and observe the outcomes state s' and reward r, now update the function Q(s,a)
 * We then take the action a that we chose in step 3, and then performing this action returns us a new state s' and a reward r
 * Then update Q(s,a) using the Bellman equation
 
+## Deep Q-learning
+* Creating and updateing a Q-table can be ineffective in large environments
+* Examples below correspond to teaching an agent to play doom (big environment with millions of different states)
+* DQ nerual new takes a stack of four frames as an input and pass though the network then output a vector of Q-values for each action possible at the given state
+* Take the largest Q-value from the vector to find the best action
+* Preprocessing can be important, reducing complexity of states can greatly reduce computational time
+* This example will be using stacked frames so there is an idea of motion, one frame will not tell us this information
+* Frames are processed by three convoloution layes which allow you to exploit spatial relationshiips in images
+* Each laywith will used [ELU](https://arxiv.org/pdf/1511.07289.pdf) as an activation function and one output layer that produces the Q-calue estimation for each action
+* We need to watch out for previous experiences, to do this we create a replay buffer
+* A replay buffer stores experience tuples while interactin with the environment and then we sample a small batch of tuple to feed the network
+* This prevents the network from only learning about what it has immeadiately done
+* If we train the network in sequential order, we eisk the after being influenced by correlation
+* By sampling the replay buffer at random, we can break this correlation
+    * This precents action values from osicllatinf or divergin catastrophically  
+* We want to update our neural net weights to reduce the error  
+* The error or TD error, is calculated by taking the difference between our Q_target(maximum possible value from the next state) and Q_value (our current prediction of the Q-value)  
+* We do this by sampling the environment where we perform action and store the observed experience in tuples in a replay memory
+* Select a small bath of tupel radomly and learn from it using a gradient decent update step
