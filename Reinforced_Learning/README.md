@@ -225,4 +225,36 @@
 * We want to update our neural net weights to reduce the error  
 * The error or TD error, is calculated by taking the difference between our Q_target(maximum possible value from the next state) and Q_value (our current prediction of the Q-value)  
 * We do this by sampling the environment where we perform action and store the observed experience in tuples in a replay memory
-* Select a small bath of tupel radomly and learn from it using a gradient decent update step
+* Select a small batch of tuple randomly and learn from it using a gradient decent update step  
+
+## Improvements in Deep Q Learning
+* A lot of improvements have been made in deep Q learning since 2004
+    * Fixed Q-targets
+    * double DQNs
+    * dueling DQNs (DDQN)
+    * Prioritized experience replay (PER)  
+
+### Fixed Q-targets
+* In deep Q learning, when we want to calculate the TD error (aks the loss), we caluculate the difference between the TD target (Q_target) and the current Q value (estimation of Q)
+* The catch is that we don't have anr idead of the real TD target, it needs to be estimated
+* Using the bellman equation, TD target is the reward of taking that action at a state plus the discounted highest Q calue for the next state
+* The issue with this is that the parameters (weights) for estimating the target and Q value are the same
+* This means that for every step of training, the q-value AND target value shifts (like chasing a moving target)
+* To combat this, we use fixed Q-targets which what introduced by DeepMind
+    * Using a seperate network with e fixed parameter(w) for estimating the TD target
+    * At every Tau step, we copy the parameters from our DQN network to update the target network
+    * This results in more stable learning because the target fuction stays fixed for a while  
+    * Q-target implementation  
+        * First create two seperate networks (DQN)
+        * during the training, calculate the TD target using the target network
+        * Update the target network with the DQNetwork every tau step (tau is a hyperparameter that we define)  
+* Double DQNs
+* Also known as double learning, havles the problem of the overestimation of Q-values
+* When normally calculating the TD target. How are we sure that the best action for the nex state is the action with the highest Q-value?
+* We know tha tthe accuracy of q-values depends on what action we tried and neighboring state we explored
+* Because of this, at the start of training, we don't have enough informaiton about the best action to take. Therfore, taking the max q value (which is noisey) as the best actino to take can lead to false positives.
+* If non-optimal action are regularly given at a higher Q-value then the optimal best action, the learning will be complicated. 
+* To fix this, we end up using two networks to decouple the action selection from the target Q value generation
+    * Use out DQN network to select that is the best action to take for the next state (the action with the highest Q value)
+    * use our target network to calculate the target Q value of taking the action at the next state
+The Double DQN helps us reduce the overestimation of q values and as a consequence, helps us train faster and have more stable learning.  
