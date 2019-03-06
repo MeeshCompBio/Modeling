@@ -248,7 +248,8 @@
         * First create two seperate networks (DQN)
         * during the training, calculate the TD target using the target network
         * Update the target network with the DQNetwork every tau step (tau is a hyperparameter that we define)  
-* Double DQNs
+
+###  Double DQNs
 * Also known as double learning, havles the problem of the overestimation of Q-values
 * When normally calculating the TD target. How are we sure that the best action for the nex state is the action with the highest Q-value?
 * We know tha tthe accuracy of q-values depends on what action we tried and neighboring state we explored
@@ -258,3 +259,43 @@
     * Use out DQN network to select that is the best action to take for the next state (the action with the highest Q value)
     * use our target network to calculate the target Q value of taking the action at the next state
 The Double DQN helps us reduce the overestimation of q values and as a consequence, helps us train faster and have more stable learning.  
+
+### Dueling DQN (aka DDQN)
+* Remeber that Q-calues correspond to how good it is to be at that stat and taking an action at that state Q(s,a)
+* This decomposes to V(s) the calue of being at the stat and A(s,a) the advantage of taking that action at that stae (how much better it is to take this action bersus all other possible actions at that state)  
+    * With DDQN we will separate the estimator of these two elements using two new streams
+    * One that estimates the state value (s)
+    * One that estimates the advantage for each action A(s,a)
+    * The two streams will be compbined using a special aggregation lawyer to get the estimate Q(s,a)  
+* We need to calculate these estimate seperately before combining because, our DDQN can learn which states are valuable without having to learn the effect of each action at each state (since it is calculating V(s))  
+* A normal DQN needs to calculate the balur of each action at that state, but can be affected if all actions at a state are bad
+* By decoupling, we are able to use this method for state where the actions to not affect the environment in a relavent way
+    * In most states, the choice of action has no effect on what happens  
+* We can force our advantage funciton estimator to have 0 advantage at the chosed action to no fall in into the isse of identifiability  
+* To do that, we subtract the average advantage of all actions possible of the state
+    * This helps us accelerate training
+    * Becuase we can calculate the value of a state without calculating the Q(s,a) for each action be decoupling the streams  
+* The only thing we need to modify for implementation is to add streams to DQN architecture  
+
+### Proritized Experience Replay
+* PER idea is that some experiences may be more important than others for our traning but might occure less frequently
+* Becuase we sample batch randomly, the important experiences occur rarely and have no chance of being selected
+* We use PER to try and change sampling distribution by using a criterion to define the priority of each tuple experience
+* We want to take in a priority experience where there is a big difference between our prediction and the TD target since it means that we have a lot to learn about it  
+    * We use the absolut value of the magnitude of our TD error and put that prioity in the experience of each replay buffer
+    * Can't just do greed prioritization because it will lead to always sampleing same experiences
+    * Need to use stochastic prioritization which generated the probability of being chosen for a replay
+    * As a consequence, furing each timsetp, we will get a batch of samples with this probability distribution and train our network on it
+    * The way we sample the experiences must match the underlying distribution they came from
+    * But, becuase we priority sampling, purely random sampling is abandonded and we introduce bias toward high-priority samples
+    * If we update our weights normally, we take a risk of overfitting
+    * To help alleviate this, we will update our weights with only a small protion of experiences that we consider really interesting
+    * To correct this bias, we use importance sampling weights (IS) that will adjust the updating by reducing the weights of the oger seen samples
+    * Weights corresponding to hihg-prority samples will have little adjustment since they will be seen many times, low priority samples will have full update
+    * The role of b (importance of smampling weight), is annealed up to 1 over the duration of the training, because the weights are more important in the end of learning when our q values begin to converge  
+* To impliment, we can't sorts all the experience replay buffers according to proiorities since it will not be computationally efficient
+* An unsorted sumtree will be used instead (binary tree with max of two children at each node)
+* This resuts in the deepest nodes (leaves), contain the priority calues and a data array that points to leave containing the experiences (O(log n))  
+* We then create a memory object that will contain our sumtree and data
+* To sample a minibatch of size k, the range [0, to totoal priority] will be divided into k ranges (value is uniformly sampled from reach range)
+* The transitions (experiences) that correspond to each of these sampled values are retrieved from the sumtree
