@@ -10,6 +10,7 @@
 [RL video tutorials](https://www.youtube.com/watch?v=q2ZOEFAaaI0&feature=youtu.be)  
 [Simple Reinforcement Learning with Tensorflow Part 8: Asynchronous Actor-Critic Agents (A3C)](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2)  
 [Conveloution in machine learning](https://medium.com/@ageitgey/machine-learning-is-fun-part-3-deep-learning-and-convolutional-neural-networks-f40359318721)
+[Deep Deterministic policy gradients using TensorFlow ](https://pemami4911.github.io/blog/2016/08/21/ddpg-rl.html)
 
 ## Overview
 
@@ -318,7 +319,7 @@ The Double DQN helps us reduce the overestimation of q values and as a consequen
     * Since we use a gradient to find the best parameters, we see a smooth update for our policy at each step.
     * Because a gradient is used to find the best parameters, we are guarenteed to converge on local maxiumu (worst case), or global maxiumum (best case)  
 * Policy gradients are more effective in high dimensional action spaces or when using continous actions
-    * Deep Q-learning assigns a score for each possible actoin, but what is there is an infinite number of actions
+    * Deep Q-learning assigns a score for each possible actobin, but what is there is an infinite number of actions
     * For Policy based methods, you can adjust the parameters directly  
 * Policy gradients can lean stchastic policies
     * There are two advantages though
@@ -339,4 +340,19 @@ The Double DQN helps us reduce the overestimation of q values and as a consequen
 * To mesure how good our policy is, we use the objective function (Policy Score Function) that calculates the expected reward of policy
 * Three methods exist for optimizing policies. The choice depends only on the environment and the objectives we have
 * Episodic environment
-    * 
+    * We can use the start value, calculate the mean of th return from the first step (G1). This is vumulatibe discounted reward for the entire episode
+    * This idea is that if I always start in some state s1, what's the total reward I'll get from the start state until the end?
+    * We want to find the policy that maximizes G1, because it will be the optimal policy. This is due to the reward hypothesis
+    * We calculate the sore using J1(theta), we will then want to improve the score by tuning the parameters (step 2)
+    * In a continuous environment, we can use the average value, becuase we can't rely on a specific start state.
+    * Each state value is now weighted (sinve some things happen more than others), by the probability of the ocurrence of the respected state.
+    * Step 3 we can use the average reward per time step, (we want to get the most reward per time step)  
+
+#### Second step: Policy gradient ascent
+* We already have a Policy score function that tells us how good our policy is
+* Now, we wanat to find a parameter (theta) that maximizes this score funciton
+* Maximizing the score funciton means finding the optimal policy, we use gradient ascent on policy parameters to do this
+* Gradient ascent is the inverse of gradient decent (gradient always points to the stepest change)
+* For Gradient ascent, we want to take the direction of the steepest increase of the function
+* Gradient descent is used becuase we have an error fuction that we want to minimize, but the score function is not an error function and we want to maximize it  
+* Idea is to find the gradient to the current polic (pie) that updates the parameter in the direction of the greatest increase, and iterate
