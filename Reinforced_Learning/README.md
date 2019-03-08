@@ -11,6 +11,7 @@
 [Simple Reinforcement Learning with Tensorflow Part 8: Asynchronous Actor-Critic Agents (A3C)](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2)  
 [Conveloution in machine learning](https://medium.com/@ageitgey/machine-learning-is-fun-part-3-deep-learning-and-convolutional-neural-networks-f40359318721)
 [Deep Deterministic policy gradients using TensorFlow ](https://pemami4911.github.io/blog/2016/08/21/ddpg-rl.html)
+[Policy Gradient Algorithms](https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html#a2c)
 
 ## Overview
 
@@ -356,3 +357,65 @@ The Double DQN helps us reduce the overestimation of q values and as a consequen
 * For Gradient ascent, we want to take the direction of the steepest increase of the function
 * Gradient descent is used becuase we have an error fuction that we want to minimize, but the score function is not an error function and we want to maximize it  
 * Idea is to find the gradient to the current polic (pie) that updates the parameter in the direction of the greatest increase, and iterate
+* The policy gradient is trelling us how we should shit the policy distribution through changing parameters thata if we want to achieve a higher score
+* If R(tau) is high, it means that on average, we took actiona that lead to high rewards. We want to increase the probability of taking these actions
+* If tau is low, we want to push down the probabilities of the actions seen
+* This policy gradient causes the parameters to move most in the direction that facors actions that has the highest return  
+
+## Intro to Advantage Actor 
+* We have already discuss value vase methods (Q-learning, DQL), where we take a value funciton that will map each state action pair to a value.
+* This works well when you have a finit set of actions
+* Policy based methods are used to directly optimize the policy without using a value function.  
+* This is useful when the action space is continuous or stochastic.
+* The main problem is finiding a good score function to compute how good a policy is (We use the total rewards of the episode)
+* Both of the methods above have big drawbacks
+* To combast this, we used a hybrid method called actor critic
+* A critic tha measures how good the action taken is (value-based)
+* An actor that controls how our agent behaves (policy-based)
+* This is the basis of some state of the art algorithms such as Proximal Policy Optimization  
+
+#### The problem with policy gradients
+* If there is a high reward across all actions, even if one action was bad, the average woudl be good becuase of the total reward
+* To have an optimal policy, we would need a lot of samples, which creates slow learning becuase it takes a lot of time to converge  
+
+### Introducing the Actor Critic
+* It is a better score function becuase, instead of waiting until the end of the episode as we do in Monte Carlo REINFORCE, we make an update at each setp (TD learning)  
+* Becuase we do an update at each time step, we can't use the total rewards R(t)
+* We need to train a Critic model that approximates the value function, This value function replaces the rewards function in the policy gradient that calculates the rewards only at the end of the episode  
+
+### How Actor Critic, works
+* Imagine you are playing a videogame with your friend, you try an action and your friend critics it
+* learning from that, you will update your policy and be better at plying the game
+* On the other hand, your friend (the critic) will also update thier own way to provide feeback so it van be better next time
+* Idea of actor critic is to have two neural networks  
+    * Actor pie(s,a, theta) a policy funciton, controls how our agent acts
+    * Critic q^(s, a, w) A calue fcuntion, measures how good these actions are
+    * They both run in parallel  
+    * Because we have two models (Actor and Critic) that must be trained, it means that we have two set of weights (theta for action and w for critic)
+    * Both weights need to be optimized seperately 
+    * At each timestep t, we take the curretn state (St) from the environment and pass it as an input through our Actor and Critic
+    * The Policy take the state and outputs an action (At), and recieves a new stat (St + 1) and a reward (Rt + 1)
+    * The Critic then computes the value of taking that action at that state
+    * The Actor updates is policy parameters (weights) using this q value
+    * After the parameters are updates, the actor profuces the next action to take at At+1 giben the new state St+1.
+    * The Critic then updates is values paramters  
+
+### A2C and A3C
+* Value-based methods have high variability
+* To fix this, we talked about using the advantage funciton instead of the value function
+* This function will tell us the improvement compared to the average the action taken at that state is
+* In other words, the function calculates the extra reward I get if I take this action. The extra reward is beyond the expected value of that state
+* If A(s,a) >0: Our gradient is pushed in that direction
+* If < 0: Our action is doing worse than the average at that state so the gradient is pushed in the opposite direction
+* Implementing this advantage function requires two value functions Q(s,a) and V(s). We can use the TD error as a good estimator of the advantage function  
+
+#### Two different strategies: Asynchronous or Synchronous
+* A2C (aka Advantage Actor Critic)
+* A3C (Asynchronous Advantage Actor Critic)
+* A3C does not use experience replay because it requires a lot of memory
+* Instead we asynchronosly execute different agents in parallel on multiple instances of the environment
+* Each working (copy of the network) will update the global netwrok aysynchronously  
+* The only difference in A2C is that we synchornosly update the global network. We wait until all workers have finished thier training and calculated thier gradients to average them, to update our global network
+* How to pick between the two?
+* In A3C, some workers (copies of the agent) will be playing with older version of the paramets. Thus the aggregating updat will not be optimal
+* That is why A2C waits for each actor to finish thier segment of experience before updateing the global parameters
