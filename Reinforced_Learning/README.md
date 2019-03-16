@@ -12,6 +12,7 @@
 [Conveloution in machine learning](https://medium.com/@ageitgey/machine-learning-is-fun-part-3-deep-learning-and-convolutional-neural-networks-f40359318721)
 [Deep Deterministic policy gradients using TensorFlow ](https://pemami4911.github.io/blog/2016/08/21/ddpg-rl.html)
 [Policy Gradient Algorithms](https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html#a2c)
+[Demystifying Reinforcement Learning](https://neuro.cs.ut.ee/demystifying-deep-reinforcement-learning/)
 
 ## Overview
 
@@ -419,3 +420,73 @@ The Double DQN helps us reduce the overestimation of q values and as a consequen
 * How to pick between the two?
 * In A3C, some workers (copies of the agent) will be playing with older version of the paramets. Thus the aggregating updat will not be optimal
 * That is why A2C waits for each actor to finish thier segment of experience before updateing the global parameters
+
+# Simple Reinforcement Learning with Tensorflow
+## Part 0: Learning with Tables and Neural Networks
+* Starting with Q-learning algorithm, start by using simple lookup table then show how to implement in tensorflow
+* Q-learning attempts to lear the calue of being in a given state and taking a specific action there
+* We are going to try to solve the frozen lake environment from open AI gym  
+    * 4x4 grid of blocks, blocks can be start, goal, safe, frowzen or dangerous
+    * Goal is for agent to move from start to finish without going into a hole
+    * The catch is that the wind can blow you onto a space you didn't choose
+    * Reward at every step is 0, entering the goal is a value of 1  
+* Q-table is a set of values for every state (row) and action (columns) possible in the environment
+    * For this problem, we have 16 possible states and 4 possible actions (16x4 table of Q-values)
+    * Table is initialized with all 0s to start
+    * Table will update as we observe rewards for various actions  
+* Make updates to Q-table using the Bellman equation
+    * The expected long-term reward for a given action is equal to the immediate reward from the current actions combined with the expected reward from the best future action taken at the following state
+    * We reuse our own Q-table when estimating how to update our table for future actions
+    * Eq 1. Q(s,a) = r + γ (max(Q(s’,a’)))
+    * It says the the Q-value for a given stat s and action a should represent the current reward r plus the max discount gamme furutre reward expected according to our own table for the next state s' we would end up in
+    * The discount variable allows us to pick how important the potential future rewards are to the present one
+    * By updating this way, the table slowly begins to obtain an accurate measures of the expected future reward for a given action in a given state.  
+* For most problems, tables simply do not work
+* Neural networks serve as a way to scal, by acting as a function approximator, we can take any number of possible states taht can be represented as a vector and learn to map them to Q-values
+* Frozen lake will use a one-layer network which will take the state encoded in a one-hot vector (1x16) and produces a vector of 4-Q-values, one for each action
+* This type of network acts as a glorified table where the weights serving as the old cells
+* Key difference is that we can easily expand the tensorflow network with added layers, activation fucntions and different input types
+* Updating "table" is a little different, instead we use back-propogation and a loss function
+    * loss function withh be the sum-of squares loss, where the difference between the current predicted Q-values, and the "target" calue is computed and then gradients passed through the network
+    * In our case, our Q-target for the chosen action is the equivalent to the Bellman equation
+    * Eq2. Loss = ∑(Q-target - Q)²  
+* While the neural net learns how to solver the problem, it does not do as well as the Q-table
+* They do allow for greater flexibility at the cost of stability
+* Two tricks we can use are experience replay and freezing target networks  
+
+## Part 1 - Two-armed Bandit
+* RL provides teh capacity for us not only to reach an artifical agent how to act, but to allow it to learn though its owen interactions with an environment
+* Building an agent requires a lot of thinking
+* RL must allow the agent to learn the correct pairings itself through the use of oberservations, rewards, actions
+* The following will walk though the creastion and training of reinforcement learning agents  
+
+### Two-Armed Bandit
+* There are n-many slor machines, each with a different fixed payout probability
+* The goal is to discover the machine with the best payout and maximixe the returned reward by always picking it
+* For simplicity we are only going to use two slot machines
+* This example is more of a precursor to RL problems than one itself.
+* Typical aspects of a task that make it a TL problem inculde
+    * Diffent actions yield different rewards
+    * Rewards are delayed over time
+    * Reward for an action is conditional on the state of the environment  
+* This example does not have to worry about the last two bullet points
+* We only need to focus on which rewards we get for which possible actions, and making sure we pick the optimal ones
+* The satement above is also know as a "policy"
+* The method we are using is called policy gradients, where the simple Neral Net learns a policy from picking actions by adjusting weights through gradient decent using feedback from the environment
+* The other approach is where the agent learns "value functions" where the agent learns to predict how good a given stat or action will be the the agent to be in
+* Both approches allow agent to learn good behaviour, but the policy gradient approach is a little more direct  
+
+### Policy Gradient
+* The simple way to think of policy gradient network is one which produces explicet outputs on any state
+* The network will consist of just a set of weight, with each corresponding to each of the possible arms to pull in the bandidt, and will represent how good our agent thinks it is to pull each arm
+* If we initialize the weights to 1, our agent will be somewhat optimistic about each arm's potential reward
+* To update the network, we will try an arm with an e-greedy policy
+* This means that agenet will choose action that correspond to the largest expected value, but occasionally (e probability), it will choose randomly
+* This way allows agent to try out each of the different arms to continue to learn more about them
+* Once the agent takes an action, we give it a reward of 1 or -1, we can then update to network using the policy loss equation
+* Loss = -log(π)* A  
+* A is the advantage and is essential to all RL algorithms. It corresponds to how mich better an action was than some baseline
+* We will simplfy our baseline to equal 0, and it can be thought of as simple the reward we recieved for each action (in reality, baselines are more complex)
+* π is the policy, in this case, it is the chosen action's weight
+* This loss function allows us to increase the weight for actions that reilded a positive reward, and devreased them for actions that yielded a negative reward. 
+* This will allow our agent to be more or less likey to pick that action in the future
