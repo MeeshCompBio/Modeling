@@ -490,3 +490,39 @@ The Double DQN helps us reduce the overestimation of q values and as a consequen
 * π is the policy, in this case, it is the chosen action's weight
 * This loss function allows us to increase the weight for actions that reilded a positive reward, and devreased them for actions that yielded a negative reward. 
 * This will allow our agent to be more or less likey to pick that action in the future
+
+## Part 2 - Policy-based Agents
+* This section is about using an agens that can take observations in the world, and take actions that provide the optimal reward
+* Environments which pose the full problem to an agent are referred to as Markov Decision Processes
+* These environments not only provide rewards and state transitions given actions, but those rewards are also condition on the state of the environment asn the action the agent takes within the state. They dynamics can be delayed over time
+* A markove decision process can be defined as follows  
+    * A MDP consists of a set of all possible states s from which our agent at any time will experience s.
+    * A set of all possible actions A from with our agent at any time will take action a 
+    * Given a state actions pari (s,a) and the reward r is given by R(s,a).
+    * At any time in the MDP, an agent is given a state s, takes action a, and recieves a new state s' and reward r.  
+* We can pose almost any task we could think of as an MDP
+
+### Cart-pole task
+* We will have our agent, learn how to balance a pole for as long as possible without falling
+* This taks requires a few things  
+    * Observations- Agent needs to know where the pole currently is and the angle at which it is balancing. To do this, our neural net will take and obvsercations and use it when productin the probability of an action
+    * Delayed reward- Keeping the pole in the air as long as possible means moving in ways the will be adcantagoes for both the present and the future. 
+    * To accomplish this , we will adjust the reward value for each observation-action pair using a function that weighs actions over time.   
+* To take rewards over time into account, we will need to adjust the policy gradient from before  
+    * we will now need to update our agent with more tha one experience at a time
+    * We will collect experiences in a buffer and the occasionally use then to update our agent all at once
+    * These sequences of experiences are sometime regerred to as rollouts or experience traces
+    * These rollouts can't be applied by themselves, they will require a discount factor.  
+* This allows each action to be a little bit responsible for not only the immediate reward but the rewards that follow  
+
+## Part 3 - Model-Based RL  
+* This section will talk about using a model for the environment in the cart pole situation to improve it performance
+* The model will be a neural network that attemps to learn the dynamics of the real environment
+* For the cart-pole example, we want to make a model to predict the next position of the Cart given the previous position and an action
+* By learning an accurate model, we can train our agent using the model rather than requiring to use the real environment everytime.
+* This can have hige advantages when attempting to learn policies for acting in the physical world
+* When we build a model of the environment, our agent can 'imaging' what it might be like to moce around the real environment and we can train a policy on this imagined environment in addition to the real one 
+* If we get a good enough model of the environment, the agent could be trained entirely on the model and even perform well when placed in the real environment for the first time
+* The example will use a neural next that will learn the transition dynamics between a previous observation, reward and done state.
+* The training procedure will involve switching betwen training our model using the real environment, aand training our agent's policy usin the model environment
+* Doing this will allow us to learn a policy that allows our agent to solve the cartpole task without actually ever training the policy on the real environment
