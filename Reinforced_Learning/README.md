@@ -525,4 +525,50 @@ The Double DQN helps us reduce the overestimation of q values and as a consequen
 * If we get a good enough model of the environment, the agent could be trained entirely on the model and even perform well when placed in the real environment for the first time
 * The example will use a neural next that will learn the transition dynamics between a previous observation, reward and done state.
 * The training procedure will involve switching betwen training our model using the real environment, aand training our agent's policy usin the model environment
-* Doing this will allow us to learn a policy that allows our agent to solve the cartpole task without actually ever training the policy on the real environment
+* Doing this will allow us to learn a policy that allows our agent to solve the cartpole task without actually ever training the policy on the real environment  
+
+## Part 4: Deep Q-Networks and Beyond
+* This will be transitioning from single layer network to multi layer NN
+* Impliment experince replay, allowing network to train itself from experiences
+* Use a second target network to calculate Q-values during update  
+
+### Getting from Q-Network to Deep Q-Network  
+* Convolution layers
+    * Instead of considering each pixel independantly, convolutional layers allow us to consider regions of an image and maintain spatial relationships between the objects on the screen as we send information up to a hight levels of the network
+    * Concolutional nerual netowrks learn represenationns that are similar to those of the primate visual cortex
+    * In Tensoflow, we can use the tg.contrib.layers.concolution2d function to easily create a concolutional layer
+    * tf.contrib.layers.convolution2d(inputs,num_outputs,kernel_size,stride,padding)
+    * num_outs referes to how many filters we woudl like to apply to the previous layer
+    * Stride regers to many pizels we want to skip as we slide the window across the layer
+    * Padding referes to whether we want our window to slide over just the bottom layer ("Valid") or add padding around it ("SAME") in order to ensure that the C layer has teh same dimentions as the previous layer  
+* Experience Replay  
+    * The idea is that by storing the agent experiences, we can more robustly learn to perform well in the task
+    * By keeping the experience we draw random, we prevent the network from only learning about what it is immeadiatley doing in the environment
+    * This allows it to learn form a more varied array of past experiences
+    * Experiences are stored as a tuple <state, action, reward, next state> 
+    * The ERB stores a fixed number of recent memories, and as new ones come in, old ones are removed
+    * When it is time to train, we draw a uniform batch of random memeories from the buffer, and train our network with them
+    * For DQN, we will build a simple class that handels storing and retrieving memeories  
+* Separate Target Network
+    * A second network can be used during the training procedure to generate the target Q-values that will be used to compute the loss for every action during training
+    * Why not use one network?? Because at every step of training, the Q-networks values shift and if we are using a constantly shifting set of values to adjust our network values, then the value estimations can easily spiral out of control. 
+    * The nework can become destabalized  by falling into feedbask loops between the target and esitmated Q-values
+    * To avoid this, the networks weights are fixed, and only periodically or slowly updated to the primary Q-networks value
+    * The example will be updating the network frequently but slowly, which helps stabalize the training process  
+
+### Going beyond DQNs
+#### Double DQN
+* Regular DQN often overestimates the Q-values of the potential actions to take in a given state
+* Why use two? if certain suboptimal actions regularly were given higher Q-values than optimal actions, the agent would have a hard time ever learning the ideal policy
+* Instead of taking the max over Q-vals when computing the target Q-vale for our training step, we use our primary netwrok to chose an action, and our target network to generate the target Q-values for that action
+* By decoupling the action choice from the target Q-value generation, we are able to reduce the overestimation and train faster/more reliably. 
+* Q-Target = r + γQ(s’,argmax(Q(s’,a,ϴ),ϴ’))  
+
+#### Dueling DQNs
+* The Q-vals we have been talkign about, correspond to how good it is to take a certain action given a certain state Q(s,a)
+* This action given a stae can actually be decomposed int o two mor efundamental notions of value
+* The value function V(s), which says how good it is to be in any given state
+* The advantage function A(a) which tells how much better taking a certain action would be compared to the others.
+* Q(s,a) =V(s) + A(a)
+* The goal of dueling DQN is to have a network that separately computes the adcantage and the value functions and combines them back into a single Q-function at the final layer
+* We can achieve more robust estimates of state value by decoupling it from the nexessity of being attached to specific actions  
