@@ -1,0 +1,1 @@
+A quick example on how to use pydantic and FastAPI to serve up a model using the iris dataset
