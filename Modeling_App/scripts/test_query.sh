@@ -4,5 +4,8 @@ curl -X POST \
   -H 'Content-Type: application/json' \
   -H 'cache-control: no-cache' \
   -d '{
-  "VALUE": [0.1234],
+    "SL": [4.7],
+    "SW": [3.0],
+    "PL": [1.4],
+    "PW": [0.2],
 }'
