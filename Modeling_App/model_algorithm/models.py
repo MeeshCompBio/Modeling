@@ -9,7 +9,7 @@ from model_algorithm.data_models import TrainTestSet, IrisFeatures, Response
 def train(train_test_split: TrainTestSet, num_round: int = 10, learning_rate: float = 0.01) -> xgb.XGBRegressor:
     bst = xgb.train(
         {"learning_rate": learning_rate, "objective": "reg:squarederror"},
-        xgb.DMatrix(train_test_split.df_X_train, label=train_test_split.df_y_train),
+        xgb.DMatrix(train_test_split.df_X_train, label=train_test_split.df_Y_train),
         num_round
     )
     return bst
@@ -30,6 +30,6 @@ def deserialize(model_path: os.PathLike) -> xgb.XGBRegressor:
 
 def predict(bst: xgb.XGBRegressor, input: IrisFeatures) -> Response:
     xgb_design = xgb.DMatrix(input.get_pandas_df())
-    y_hat = bst.predict(xgb_design)
-    y_hat = pd.DataFrame(y_hat, columns=["predicted"])
-    return Response.from_pandas_df(y_hat)
+    Y_hat = bst.predict(xgb_design)
+    Y_hat = pd.DataFrame(Y_hat, columns=["target"])
+    return Response.from_pandas_df(Y_hat)

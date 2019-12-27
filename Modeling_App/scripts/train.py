@@ -1,5 +1,6 @@
 import pathlib
 import click
+import os
 
 from model_algorithm.data import fetch_train_test_split
 from model_algorithm.models import train, serialize

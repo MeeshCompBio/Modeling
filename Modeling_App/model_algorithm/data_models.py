@@ -20,6 +20,7 @@ class PandasModel(BaseModel):
             raise validation_error
         object.__setattr__(m, '__dict__', values)
         object.__setattr__(m, '__fields_set__', fields_set)
+
         return m
 
 
@@ -36,12 +37,22 @@ class Response(PandasModel):
 
 class TrainTestSet(BaseModel):
     X_train: IrisFeatures
-    y_train: Response
+    X_test: IrisFeatures
+    Y_train: Response
+    Y_test: Response
 
     @property
     def df_X_train(self) -> pd.DataFrame:
         return self.X_train.get_pandas_df()
 
     @property
+    def df_X_test(self) -> pd.DataFrame:
+        return self.X_test.get_pandas_df()
+
+    @property
     def df_Y_train(self) -> pd.DataFrame:
         return self.Y_train.get_pandas_df()
+
+    @property
+    def df_Y_test(self) -> pd.DataFrame:
+        return self.Y_test.get_pandas_df()
