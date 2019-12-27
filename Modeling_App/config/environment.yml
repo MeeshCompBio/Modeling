@@ -1,0 +1,23 @@
+name: model_app
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  -  blas=*=openblas
+  -  click
+  -  fastapi
+  -  feather-format
+  -  numpy
+  -  openblas
+  -  pydantic
+  -  scikit-learn
+  -  scipy
+  -  starlette
+  -  uvicorn
+  -  pandas
+  -  python=3.7
+  -  pydantic
+  -  pytest
+  -  seaborn
+  -  shap
+  -  xgboost
