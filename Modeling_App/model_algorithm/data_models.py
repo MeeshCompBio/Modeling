@@ -2,6 +2,7 @@
 
 from typing import List
 from pydantic import BaseModel
+from pydantic import validate_model
 
 import numpy as np
 import pandas as pd
@@ -12,7 +13,6 @@ class PandasModel(BaseModel):
 
     @classmethod
     def from_pandas_df(cls, df: pd.DataFrame) -> 'PandasModel':
-        from pydantic import validate_model
         obj = df.to_dict(orient="list")
         m = cls.__new__(cls)
         values, fields_set, validation_error = validate_model(cls, obj)
