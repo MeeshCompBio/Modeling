@@ -11,6 +11,7 @@ import pandas as pd
 
 from model_algorithm.data_models import IrisFeatures, Response, TrainTestSet
 
+
 def fetch_train_test_split(random_seed: int = 123456, n_splits: int = 10) -> TrainTestSet:
     iris = datasets.load_iris()
     data = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
