@@ -5,10 +5,10 @@ import sys
 from app.api import api
 
 
-def app():
-    app = FastAPI()
-    app.include_router(api)
-    return app
+
+app = FastAPI()
+app.include_router(api)
+
 
 
 if __name__ == "__main__":
