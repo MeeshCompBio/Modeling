@@ -4,7 +4,7 @@ services:
     build:
       context: .
     ports:
-      - "80:80"
+      - "8888:80"
     volumes:
     - ./test:/mnt/test:shared
     cap_add:

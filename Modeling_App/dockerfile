@@ -1,12 +1,12 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.6
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 COPY config/requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY app /app
-WORKDIR /app/
+COPY ./ /Modeling_App
+WORKDIR /Modeling_App/app
 
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/Modeling_App
 
-EXPOSE 80
+EXPOSE 8888
