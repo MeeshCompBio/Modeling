@@ -1,4 +1,4 @@
-fastapi==0.61.2
+fastapi==0.65.2
 numpy==1.19.4
 Cython==0.29.21
 onnx==1.8.0
