@@ -1,7 +1,7 @@
 fastapi==0.61.2
 numpy==1.19.4
 Cython==0.29.21
-onnx==1.8.0
+onnx==1.13.0
 onnxconverter-common==1.7.0
 onnxruntime==1.5.2
 pydantic==1.7.2
